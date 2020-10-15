@@ -16,3 +16,11 @@ sfo, nyc = Airport.first, Airport.last
     duration: 325
   )
 end
+
+50.times do
+  nyc.departing_flights.create(
+    destination_airport_id: sfo.id,
+    departure_time: rand(3.months).seconds.from_now,
+    duration: 325
+  )
+end
