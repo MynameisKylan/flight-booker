@@ -3,23 +3,23 @@
 <%= form_with method: 'get', local: true do |f| %>
   <p>
     <%= f.label :departure_airport, 'Departing From:'%>
-    <%= f.select 'search[departure_airport]', options_from_collection_for_select(@airports, :id, :code, params[:search][:departure_airport]) %>
+    <%= f.select 'search[departure_airport]', options_from_collection_for_select(@airports, :id, :code, { selected: (params[:search][:departure_airport] if params[:search]) }) %>
   </p>
 
   <p>
     <%= f.label :destination_airport, 'Destination:'%>
-    <%= f.select 'search[destination_airport]', options_from_collection_for_select(@airports, :id, :code, params[:search][:destination_airport]) %>
+    <%= f.select 'search[destination_airport]', options_from_collection_for_select(@airports, :id, :code, { selected: (params[:search][:destination_airport] if params[:search]) }) %>
   </p>
 
   <p>
     <%= f.label :num_tickets, 'Number of Tickets:'%>
-    <%= f.select 'search[num_tickets]', options_for_select([[1,1], [2,2], [3,3], [4,4]], params[:search][:num_tickets]) %>
+    <%= f.select 'search[num_tickets]', options_for_select([[1,1], [2,2], [3,3], [4,4]], { selected: (params[:search][:num_tickets] if params[:search]) }) %>
   </p>
 
   <% @date_options = @dates.map { |date| [date.to_date.strftime('%B %d, %Y'), date] } %>
   <p>
     <%= f.label :departure_date, 'Departure Date:' %>
-    <%= f.select 'search[departure_date]', options_for_select(@date_options, params[:search][:departure_date]) %>
+    <%= f.select 'search[departure_date]', options_for_select(@date_options, { selected: (params[:search][:departure_date] if params[:search]) }) %>
   </p>
 
   <%= f.submit 'Search' %>
@@ -29,12 +29,20 @@
 
 <% if @search_results %>
   <h3>Search Results:</h3>
-  <% @search_results.each do |flight| %>
-    <p>From: <%= flight.departure_airport.code %></p>
-    <p>To: <%= flight.destination_airport.code %></p>
-    <p>Date: <%= flight.departure_time %></p>
-  <% end %>
+
+  <p>Showing flights from <%= Airport.find(params[:search][:departure_airport]).code %> to <%= Airport.find(params[:search][:destination_airport]).code%> on <%= params[:search][:departure_date] %></p>
+
   <% if @search_results.empty? %>
     No Results Found
+  <% else %>
+    <%= form_with url: 'bookings/new', method: 'get', local: true do |f| %>
+      <% @search_results.each do |flight| %>
+        <p>Departure time: <%= flight.departure_time.in_time_zone('EST').strftime('%I:%M %p %z') %>
+        <%= f.hidden_field :num_tickets, :value => params[:search][:num_tickets] %>
+        <%= f.radio_button :flight_id, flight.id %>
+        </p>
+      <% end %>
+      <%= f.submit 'Book Flight' %>
+    <% end %>
   <% end %>
 <% end %>

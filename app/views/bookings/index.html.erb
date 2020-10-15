@@ -1,0 +1,13 @@
+<h1>All Bookings</h1>
+
+<% @bookings.each do |b| %>
+  <% flight = Flight.includes(:departure_airport, :destination_airport).find(b.flight_id) %>
+  <p><%= flight.departure_airport.code %>=><%= flight.destination_airport.code %></p>
+  <p><%= flight.departure_time %></p>
+  <p>Passengers:</p>
+  <ul>
+  <% b.passengers.each do |p| %>
+    <li><%= p.name %></li>
+  <% end %>
+  </ul>
+<% end %>
