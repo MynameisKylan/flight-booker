@@ -1,26 +1,40 @@
 <h1>Find a Flight</h1>
 
-<%= form_with model: @flight do |f| %>
+<%= form_with method: 'get', local: true do |f| %>
   <p>
     <%= f.label :departure_airport, 'Departing From:'%>
-    <%= f.select :departure_airport, options_from_collection_for_select(@airports, :id, :code) %>
+    <%= f.select 'search[departure_airport]', options_from_collection_for_select(@airports, :id, :code) %>
   </p>
 
   <p>
     <%= f.label :destination_airport, 'Destination:'%>
-    <%= f.select :destination_airport, options_from_collection_for_select(@airports, :id, :code) %>
+    <%= f.select 'search[destination_airport]', options_from_collection_for_select(@airports, :id, :code) %>
   </p>
 
   <p>
     <%= f.label :num_tickets, 'Number of Tickets:'%>
-    <%= f.select :num_tickets, options_for_select([[1,1], [2,2], [3,3], [4,4]]) %>
+    <%= f.select 'search[num_tickets]', options_for_select([[1,1], [2,2], [3,3], [4,4]]) %>
   </p>
 
   <% @date_options = @dates.map { |date| [date.to_date.strftime('%B %d, %Y'), date] } %>
   <p>
     <%= f.label :departure_date, 'Departure Date:' %>
-    <%= f.select :departure_date, options_for_select(@date_options) %>
+    <%= f.select 'search[departure_date]', options_for_select(@date_options) %>
   </p>
 
   <%= f.submit 'Search' %>
+<% end %>
+
+
+
+<% if @search_results %>
+  <h3>Search Results:</h3>
+  <% @search_results.each do |flight| %>
+    <p>From: <%= flight.departure_airport.code %></p>
+    <p>To: <%= flight.destination_airport.code %></p>
+    <p>Date: <%= flight.departure_time %></p>
+  <% end %>
+  <% if @search_results.empty? %>
+    No Results Found
+  <% end %>
 <% end %>
